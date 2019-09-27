@@ -1,0 +1,8 @@
+"","step","type","response","RT","count","first"
+"1",1,"Gaussian",0,0.593788364833333,60,"Uniform"
+"2",2,"Gaussian",0,0.695754422222222,36,"Uniform"
+"3",3,"Gaussian",0.75,1.81897945,4,"Uniform"
+"4",4,"Gaussian",0.9,0.54465332108,10,"Uniform"
+"5",5,"Gaussian",1,0.962934525,4,"Uniform"
+"6",6,"Gaussian",1,0.629459756538889,36,"Uniform"
+"7",7,"Gaussian",0.966666666666667,0.644319120166667,60,"Uniform"

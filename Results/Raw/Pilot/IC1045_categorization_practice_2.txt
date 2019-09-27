@@ -1,0 +1,12 @@
+2018-7-12,10:37:16
+trial,stimulus,selection,RT
+1,Ba_Da_Step_1.wav,Da,1.969091e+00
+2,Ba_Da_Step_7.wav,Da,2.140873e+00
+3,Ba_Da_Step_1.wav,Ba,5.418510e-01
+4,Ba_Da_Step_1.wav,Ba,7.654600e-01
+5,Ba_Da_Step_1.wav,Ba,6.164608e-01
+6,Ba_Da_Step_7.wav,Da,3.143160e-01
+7,Ba_Da_Step_7.wav,Da,7.860811e-01
+8,Ba_Da_Step_7.wav,Da,1.293819e+00
+9,Ba_Da_Step_7.wav,Da,5.184550e-01
+10,Ba_Da_Step_1.wav,Ba,2.171001e-01
