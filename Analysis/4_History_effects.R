@@ -4,7 +4,7 @@ library(lme4)
 
 rm(list = ls())
 # Load in cleaned data
-setwd("/home/eobrien/bde/Projects/Speech_dist/Analysis")
+setwd("/home/eobrien/bde/Projects/Context_Effects_Public/Analysis")
 df<- read.csv("../cleaned_data.csv")
 
 # Distance from the mean
@@ -116,9 +116,9 @@ px <- ggplot(glm_sum, aes(trial, Estimate, colour = group)) +
 
 px
 
-ggsave("recency_fx_group.pdf", px,
-       device=cairo_pdf, width=6, height=6)
-ggsave("recency_fx_group.png", px,
+ggsave("Figures/Figure2.pdf", px,
+       device=cairo_pdf, width=8, height=8)
+ggsave("Figures/Figure2.png", px,
        width=8, height=8)
 
 
@@ -174,6 +174,13 @@ big_glm3 <- glmer(response ~ d_inf*read + d_1 + d_2*read + (1|subject_id),
                   family=binomial(link="probit"),
                   control = glmerControl(optimizer ="Nelder_Mead"))
 summary(big_glm3)
+
+
+# WHAT IF THERE WAS AN INTERACTION WITH STIMULUS DISTRIBUTION? #
+big_glm4 <- glmer(response ~ d_0*read + d_1 + d_2 + type*read + (1|subject_id), 
+                  data = glm_df,
+                  family=binomial(link="probit"),
+                  control = glmerControl(optimizer ="Nelder_Mead"))
 
 
 

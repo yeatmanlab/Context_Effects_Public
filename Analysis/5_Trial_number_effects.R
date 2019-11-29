@@ -1,7 +1,7 @@
 library(ggplot2)
 library(dplyr)
 library(lme4)
-
+library(kableExtra)
 rm(list = ls())
 # Load in cleaned data
 setwd("/home/eobrien/bde/Projects/Speech_dist/Analysis")
@@ -49,4 +49,26 @@ coefs[,1:3] <- round(coefs[,1:3],3)
 options(knitr.table.format = "latex")
 kable(coefs[-3], booktabs = TRUE, linesep = "", escape = FALSE)
 
+########## What about reaction time? ###########################
+# Filter to remove any spurious reaction times (too long or too short)
+endpts_rt <- endpts %>%
+  subset(RT > 0.2) %>%
+  subset(RT < 3)
 
+# Log to make them normally distributed (ish, it's not perfect)
+endpts_rt$logRT <- log(endpts_rt$RT)
+lmfitRT <- lmer(logRT ~ trial*read + (1|subject_id), endpts_rt)
+summary(lmfitRT)
+
+# Need to do a KR approx to estimate p from t
+coefs <- data.frame(coef(summary(lmfitRT)))
+df.KR <- get_ddf_Lb(lmfitRT, fixef(lmfitRT))
+coefs$p.KR <- 2*(1-pt(abs(coefs$t.value), df.KR))
+
+colnames(coefs) <- c("$\\beta$", "SE","$z$","$p$")
+coefs$`$p$` <- pvalr(coefs$`$p$`)
+coefs[,1:3] <- round(coefs[,1:3],3)
+
+# Print it out
+options(knitr.table.format = "latex")
+kable(coefs[-3], booktabs = TRUE, linesep = "", escape = FALSE)

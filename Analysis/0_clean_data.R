@@ -152,7 +152,7 @@ use_df <- use_df %>%
   filter(age_at_testing >= 8 & age_at_testing < 14)%>%
   filter(aud_dis == 0 | is.nan(aud_dis))  %>%                # no auditory disorder
   filter(wasi_fs2 >= 80 | is.nan(wasi_fs2)) %>%           # WASI criterion
-  filter(wasi_mr_ts > 30) %>%           # WASI nonverbal not less than 2 sd below mean
+  filter(wasi_mr_ts > 30)           # WASI nonverbal not less than 2 sd below mean
   
 
 
@@ -179,7 +179,8 @@ print(paste("There are currently", length(unique(use_df$subject_id)), "subjects.
 ## assign to groups
 use_df$read <- (use_df$wj_brs + use_df$twre_index)*0.5
 use_df$group <- with(use_df, ifelse(read<= 85, "Dyslexic",
-                                    ifelse(read, "Control")))
+                                    ifelse(read > 85 & dys_dx == 1, "Other",
+                                    ifelse(read, "Control"))))
 
 ## drop identifying information
 use_df <- use_df[ , !(names(use_df) == "dob")]
@@ -208,7 +209,7 @@ group_table <- unique(use_df[columns])
 psychometric_df <- subset(psychometric_df,
                           subject_id %in% use_df$subject_id)
 psychometric_df <- merge(psychometric_df, group_table, all.x=TRUE, all.y=FALSE)
-psychometric_df <- subset(psychometric_df, threshold >1 && threshold < 7)
+psychometric_df <- subset(psychometric_df, threshold >1 & threshold < 7)
 ## omit subjects missing from clean_data (must have been excluded earlier)
 #psychometric_df <- na.omit(psychometric_df)
 ## add "paradigm" column
