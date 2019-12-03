@@ -11,7 +11,6 @@ psychometrics <- read.csv("../cleaned_psychometrics.csv")
 psychometrics <- psychometrics %>%
   subset(threshold > 1 & threshold < 7)
 
-
 ## set deviation contrasts
 type_dimnames <- list(levels(psychometrics$type),
                       levels(psychometrics$type)[2])
@@ -90,6 +89,14 @@ coefs$`$p$` <- pvalr(coefs$`$p$`)
 coefs[,1:3] <- round(coefs[,1:3],3)
 final_slope_sum <- coefs
 
+# Estimate the Bayes Factor from linear model
+h0 <- lmer(slope ~ read + type + (1|subject_id),
+           data = psychometrics)
+h1 <- lmer(slope ~ read*type + (1|subject_id),
+           data = psychometrics)
+
+BF = exp( (BIC(h1) - BIC(h0) )/2)
+print(paste("BF =", round(BF,1)))
 
 
 
@@ -141,8 +148,74 @@ coefs$`$p$` <- pvalr(coefs$`$p$`)
 coefs[,1:3] <- round(coefs[,1:3],3)
 final_lapse_sum <- coefs
 
+# Estimate the Bayes Factor from linear model
+h0 <- lmer(lapse ~ read + type + (1|subject_id),
+           data = psychometrics)
+h1 <- lmer(lapse ~ read*type + (1|subject_id),
+           data = psychometrics)
+
+BF = exp( (BIC(h1) - BIC(h0) )/2)
+print(paste("BF =", round(BF,1)))
+
+### ## ## ## ## ## ## ##
+##  THRESHOLD MODEL ##
+## ## ## ## ## ## ## ##
+full_model <- lmer(threshold ~ read*type + wasi_mr_ts + age_at_testing + adhd_dx + (1|subject_id),
+                   data=psychometrics)
+# p-values for full model
+coefs <- data.frame(coef(summary(full_model)))
+df.KR <- get_ddf_Lb(full_model, fixef(full_model))
+coefs$p.KR <- 2*(1-pt(abs(coefs$t.value), df.KR))
+print(coefs)
+
+# Remove nuisance vars?
+no_adhd_dx <- lmer(threshold ~ read*type + wasi_mr_ts + age_at_testing + (1|subject_id),
+                   data=psychometrics)
+anova(full_model, no_adhd_dx) # OK to remove adhd
+
+no_wasi <- lmer(threshold ~ read*type + age_at_testing +(1|subject_id), 
+                data = psychometrics)
+anova(no_adhd_dx, no_wasi) # OK to remove wasi
+
+no_age <- lmer(threshold ~ read*type + (1|subject_id),
+               data = psychometrics)
+anova(no_wasi, no_age) # OK to remove age
 
 
+coefs <- data.frame(coef(summary(no_age)))
+df.KR <- get_ddf_Lb(no_age, fixef(no_age))
+coefs$p.KR <- 2*(1-pt(abs(coefs$t.value), df.KR))
+print(coefs)
+
+
+no_type <- lmer(threshold ~ read + (1|subject_id),
+                data = psychometrics)
+anova(no_age, no_type) # NOT OK to remove type
+
+no_read <- lmer(threshold ~ type + (1|subject_id),
+                data = psychometrics)
+anova(no_age, no_read) # OK to remove reading
+
+final_thresh <- no_read
+
+coefs <- data.frame(coef(summary(final_thresh)))
+df.KR <- get_ddf_Lb(final_thresh, fixef(final_thresh))
+coefs$p.KR <- 2*(1-pt(abs(coefs$t.value), df.KR))
+colnames(coefs) <- c("$\\beta$", "SE","$t$","$p$")
+row.names(coefs) <- c("(Intercept)","Condition")
+coefs$`$p$` <- pvalr(coefs$`$p$`)
+coefs[,1:3] <- round(coefs[,1:3],3)
+final_thresh_sum <- coefs
+
+
+# Calculate Bayes Factor
+h0 <- lmer(threshold ~ read + type + (1|subject_id),
+           data = psychometrics)
+h1 <- lmer(threshold ~ read*type + (1|subject_id),
+           data = psychometrics)
+
+BF = exp( (BIC(h1) - BIC(h0) )/2)
+print(paste("BF =", round(BF,1)))
 
 
 #####################
@@ -189,6 +262,16 @@ row.names(coefs) <- c("(Intercept)","Reading skill", "Age")
 coefs$`$p$` <- pvalr(coefs$`$p$`)
 coefs[,1:3] <- round(coefs[,1:3],3)
 final_PC1_sum <- coefs
+
+
+# Estimate the Bayes Factor from linear model
+h0 <- lmer(PC1 ~ read + type + (1|subject_id),
+           data = psychometrics)
+h1 <- lmer(PC1 ~ read*type + (1|subject_id),
+           data = psychometrics)
+
+BF = exp( (BIC(h1) - BIC(h0) )/2)
+print(paste("BF =", round(BF,1)))
 
 
 ###### Print all the tables
