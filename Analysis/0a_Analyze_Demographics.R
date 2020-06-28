@@ -48,6 +48,12 @@ sex_count <- table(demo_df$group, demo_df$gender)
 age_x_grp <- kruskal.test(age_at_testing ~ group, demo_df)
 age_x_rd <- summary(lm(age_at_testing ~ read, demo_df))
 
+# Age summar statistics
+sum_stats <- demo_df %>% 
+  group_by(group) %>%
+  summarise(mu = mean(age_at_testing),
+          sigma = sd(age_at_testing))
+sum_stats
 
 # Look at ADHD diagnoses
 num_subj <- nrow(demo_df)

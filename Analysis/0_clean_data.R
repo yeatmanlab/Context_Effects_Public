@@ -15,6 +15,7 @@ setwd("/home/eobrien/bde/Projects/Speech_dist")
 response_df <- data.frame()
 data_dir <- file.path("Results", "Raw")
 raw_files <- list.files(path=data_dir)
+
 ## keep only categorization data (not discrimination); remove practice blocks
 ## and pilot data (subject "nnn")
 raw_files <- raw_files[!grepl("practice", raw_files)]
@@ -150,11 +151,14 @@ use_df$age_at_testing <- as.numeric(use_df$age_at_testing) / 52.25
 # Filter out any subjects who do not meet our criteria for IQ/auditory disorder
 use_df <- use_df %>% 
   filter(age_at_testing >= 8 & age_at_testing < 14)%>%
-  filter(aud_dis == 0 | is.nan(aud_dis))  %>%                # no auditory disorder
-  filter(wasi_fs2 >= 80 | is.nan(wasi_fs2)) %>%           # WASI criterion
-  filter(wasi_mr_ts > 30)           # WASI nonverbal not less than 2 sd below mean
-  
+  filter(aud_dis == 0 | is.nan(aud_dis))
+print(paste("There were ", length(unique(use_df$subject_id)), "subjects eligible for the study."))
 
+  
+use_df <- use_df %>%
+  filter(wasi_fs2 >= 80 | is.nan(wasi_fs2)) %>%           # WASI criterion
+  filter(wasi_mr_ts > 30)         # WASI nonverbal not less than 2 sd below mean
+print(paste("There were ", length(unique(use_df$subject_id)), "subjects in the IQ range"))
 
 print(paste("There are currently", length(unique(use_df$subject_id)), "subjects."))
 
@@ -179,8 +183,7 @@ print(paste("There are currently", length(unique(use_df$subject_id)), "subjects.
 ## assign to groups
 use_df$read <- (use_df$wj_brs + use_df$twre_index)*0.5
 use_df$group <- with(use_df, ifelse(read<= 85, "Dyslexic",
-                                    ifelse(read > 85 & dys_dx == 1, "Other",
-                                    ifelse(read, "Control"))))
+                                    ifelse(read > 85 & dys_dx ==1, "Other","Control")))
 
 ## drop identifying information
 use_df <- use_df[ , !(names(use_df) == "dob")]
@@ -198,23 +201,20 @@ psychometric_df <- rename(psychometric_df, subject_id=SubjectID,
                           lo_asymp=guess, hi_asymp=lapse)
 
 
-## na.locf is "last observation carry forward". This works because we know the
-## rows of the psychometrics dataframe are loaded in groups of 3, where all 3
-## rows of the CSV file are the same contrast, and "single" is the last row.
-
 ## add group and reading ability to psychometrics dataframe
-columns <- c("subject_id", "group", "wj_brs","twre_index","read","adhd_dx", "wasi_mr_ts","age_at_testing","Gauss_first")
+columns <- c("subject_id", "group", "wj_brs","twre_index","read","adhd_dx","wasi_mr_ts","age_at_testing","Gauss_first")
 group_table <- unique(use_df[columns])
 
 psychometric_df <- subset(psychometric_df,
                           subject_id %in% use_df$subject_id)
 psychometric_df <- merge(psychometric_df, group_table, all.x=TRUE, all.y=FALSE)
 psychometric_df <- subset(psychometric_df, threshold >1 & threshold < 7)
-## omit subjects missing from clean_data (must have been excluded earlier)
-#psychometric_df <- na.omit(psychometric_df)
-## add "paradigm" column
 
 write.table(psychometric_df, file="cleaned_psychometrics.csv", sep=",",
             quote=FALSE, row.names=FALSE)
 setwd("./Analysis")
 
+# Which subjects are missing psychometric functions? 
+all_subj <- unique(use_df$subject_id)
+psy_subj <- unique(psychometric_df$subject_id)
+setdiff(all_subj,psy_subj)

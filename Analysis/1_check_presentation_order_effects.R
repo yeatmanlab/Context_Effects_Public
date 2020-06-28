@@ -7,7 +7,7 @@ library(lme4)
 library(pbkrtest)
 library(ggplot2)
 
-psychometrics <- read.csv("../cleaned_psychometrics.csv")
+psychometrics <- read.csv("cleaned_psychometrics.csv")
 
 table(psychometrics$Gauss_first)/2
 
